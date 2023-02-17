@@ -18,6 +18,7 @@ def reduce_loss(tensor, rank, world_size):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--local_rank', type=int, help="local gpu id")
+parser.add_argument('--world_rank', type=int, help="local gpu id")
 args = parser.parse_args()
 
 batch_size = 128
@@ -75,7 +76,7 @@ for e in range(epochs):
         opt.zero_grad()
         loss.backward()
         opt.step()
-        reduce_loss(loss, global_rank, world_size)
+        reduce_loss(loss, global_rank, args.world_rank)
         if idx % 10 == 0 and global_rank == 0:
             print('Epoch: {} step: {} loss: {}'.format(e, idx, loss.item()))
 net.eval()
