@@ -15,20 +15,19 @@ python -m torch.distributed.launch --nproc_per_node=ngpus --master_port=29500 ma
 ```
 
 ## Multi machine multi gpu
-suppose we have two machines and one machine have 4 gpus
-
+Suppose we have two machines and each machine has 8 gpus.
 
 In multi machine multi gpu situation, you have to choose a machine to be master node.
 
-we named the machines A and B, and set A to be master node
+We named the machines A and B, and set A to be master node.
 
-script run at A
+command to run at A
 
 ```
 python -m torch.distributed.launch --nproc_per_node=4 --nnode=2 --node_rank=0 --master_addr=A_ip_address --master_port=29500 main.py --local_rank=8 --world_size=16
 ```
 
-script run at B
+command to run at B
 
 ```
 python -m torch.distributed.launch --nproc_per_node=4 --nnode=2 --node_rank=1 --master_addr=A_ip_address --master_port=29500 main.py --local_rank=8 --world_size=16
