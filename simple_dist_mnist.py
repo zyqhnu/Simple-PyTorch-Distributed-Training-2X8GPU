@@ -21,15 +21,12 @@ def main():
             if rank == 0:
                 tensor /= world_size
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--local_rank", type=int, default=0)
-    parser.add_argument('--world_size', type=int, help="total nodes")
-    args = parser.parse_args()
-
     batch_size = 128
     epochs = 5
     lr = 0.001
     local_rank = int(os.environ["LOCAL_RANK"])
+
+    world_size = int(os.environ["WORLD_SIZE"])  # get world_size from PATH
 
     torch.cuda.set_device(local_rank)
     dist.init_process_group(backend='nccl', init_method='env://')
@@ -40,7 +37,7 @@ def main():
     net = torch.nn.SyncBatchNorm.convert_sync_batchnorm(net)
     net = DDP(net, device_ids=[local_rank], output_device=local_rank)
 
-    data_root = '../dataset'
+    data_root = './dataset/'
     trainset = MNIST(
         root=data_root,
         download=True,
@@ -87,7 +84,7 @@ def main():
             opt.zero_grad()
             loss.backward()
             opt.step()
-            reduce_loss(loss, global_rank, args.world_size)
+            reduce_loss(loss, global_rank, world_size)
             if idx % 10 == 0 and global_rank == 0:
                 print('Epoch: {} step: {} loss: {}'.format(e, idx, loss.item()))
     net.eval()
